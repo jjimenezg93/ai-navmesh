@@ -5,14 +5,14 @@
 const char * gridFilename = "grid_little.txt";
 const uint16_t cellSize = 40; //size of each cell in pixels
 
-Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{ gridFilename } {
+Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{gridFilename} {
 	RTTI_BEGIN
 		RTTI_EXTEND(MOAIEntity2D)
 	RTTI_END
 
 	m_grid.IsObstacle(5, 5);
 	uint16_t gridRows = m_grid.GetGridWidth();
-	
+
 	for (uint16_t i = 0; i < gridRows - 1; ++i) {
 		for (uint16_t j = 0; j < gridRows - 1; ++j) {
 			if (!m_grid.IsObstacle(i, j)) {
@@ -23,7 +23,12 @@ Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{ gridFilename } {
 		}
 	}
 
-	m_grid = m_grid;
+	USVec2D v(m_StartPosition.mX, m_StartPosition.mY);
+	m_startNode = new PathNode(v, 0, nullptr);
+
+	v.mX = m_EndPosition.mX;
+	v.mY = m_EndPosition.mY;
+	m_endNode = new PathNode(v, 0, nullptr);
 }
 
 Pathfinder::~Pathfinder() {
@@ -33,6 +38,22 @@ Pathfinder::~Pathfinder() {
 void Pathfinder::UpdatePath() {
 	m_openNodes.clear();
 	m_closedNodes.clear();
+
+	m_openNodes.push_back(m_startNode);
+	while (!m_openNodes.empty()) {
+		PathNode * node = m_openNodes.back();
+		if (node->GetPos().mX == m_endNode->GetPos().mX
+			&& node->GetPos().mY == m_endNode->GetPos().mY) {
+			BuildPath(node);
+		} else {
+			//for next_node in connections
+		}
+	}
+
+}
+
+void Pathfinder::BuildPath(PathNode * lastNode) {
+	//iterate over all node parents to get the full path
 }
 
 void Pathfinder::DrawDebug() {
@@ -78,19 +99,19 @@ void Pathfinder::DrawDebug() {
 }
 
 bool Pathfinder::PathfindStep() {
-    // returns true if pathfinding process finished
-    return true;
+	// returns true if pathfinding process finished
+	return true;
 }
 
 //lua configuration ----------------------------------------------------------------//
 void Pathfinder::RegisterLuaFuncs(MOAILuaState& state) {
 	MOAIEntity::RegisterLuaFuncs(state);
 
-	luaL_Reg regTable [] = {
-		{ "setStartPosition",		_setStartPosition},
-		{ "setEndPosition",			_setEndPosition},
-        { "pathfindStep",           _pathfindStep},
-		{ NULL, NULL }
+	luaL_Reg regTable[] = {
+		{"setStartPosition", _setStartPosition},
+		{"setEndPosition", _setEndPosition},
+		{"pathfindStep", _pathfindStep},
+		{NULL, NULL}
 	};
 
 	luaL_register(state, 0, regTable);
@@ -99,7 +120,7 @@ void Pathfinder::RegisterLuaFuncs(MOAILuaState& state) {
 int Pathfinder::_setStartPosition(lua_State* L) {
 	MOAI_LUA_SETUP(Pathfinder, "U")
 
-	float pX = state.GetValue<float>(3, 0.0f);
+		float pX = state.GetValue<float>(3, 0.0f);
 	float pY = state.GetValue<float>(2, 0.0f);
 	self->SetStartPosition(pX, pY);
 	return 0;
@@ -108,15 +129,15 @@ int Pathfinder::_setStartPosition(lua_State* L) {
 int Pathfinder::_setEndPosition(lua_State* L) {
 	MOAI_LUA_SETUP(Pathfinder, "U")
 
-	float pX = state.GetValue<float>(3, 0.0f);
+		float pX = state.GetValue<float>(3, 0.0f);
 	float pY = state.GetValue<float>(2, 0.0f);
 	self->SetEndPosition(pX, pY);
 	return 0;
 }
 
 int Pathfinder::_pathfindStep(lua_State* L) {
-    MOAI_LUA_SETUP(Pathfinder, "U")
+	MOAI_LUA_SETUP(Pathfinder, "U")
 
-    self->PathfindStep();
-    return 0;
+		self->PathfindStep();
+	return 0;
 }

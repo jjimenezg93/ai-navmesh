@@ -9,11 +9,14 @@ class PathNode {
 public:
 	PathNode(USVec2D pos, uint16_t cost, PathNode * parent): m_pos(pos), m_currentCost(cost),
 		m_parentNode(parent) {}
-	void UpdateCost(uint16_t newCost) { m_currentCost = newCost; }
+	USVec2D GetPos() const { return m_pos; }
+	uint16_t GetCost() const { return m_currentCost; }
+	PathNode * GetParent() const { return m_parentNode; }
+	void SetCost(uint16_t newCost) { m_currentCost = newCost; }
 	void SetParent(PathNode * newParent) { m_parentNode = newParent; }
 private:
 	USVec2D m_pos;
-	uint16_t m_currentCost;
+	uint16_t m_currentCost; //costs are 10 vertical/horizontal and 14 diagonal
 	PathNode * m_parentNode;
 };
 
@@ -33,10 +36,14 @@ public:
 private:
 	void UpdatePath();
 private:
+	void BuildPath(PathNode * lastNode);
+
 	USVec2D m_StartPosition;
 	USVec2D m_EndPosition;
 
 	Grid m_grid;
+	PathNode * m_startNode;
+	PathNode * m_endNode;
 	std::vector<PathNode> m_nodes;
 	std::vector<PathNode *> m_openNodes;
 	std::vector<PathNode *> m_closedNodes;
