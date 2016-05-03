@@ -13,8 +13,8 @@ Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{ gridFilename } {
 	m_grid.IsObstacle(5, 5);
 	uint16_t gridRows = m_grid.GetGridWidth();
 	
-	for (uint16_t i = 0; i < gridRows; ++i) {
-		for (uint16_t j = 0; j < gridRows; ++j) {
+	for (uint16_t i = 0; i < gridRows - 1; ++i) {
+		for (uint16_t j = 0; j < gridRows - 1; ++j) {
 			if (!m_grid.IsObstacle(i, j)) {
 				USVec2D v(i, j);
 				PathNode node(v, 0, nullptr);
@@ -22,6 +22,8 @@ Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{ gridFilename } {
 			}
 		}
 	}
+
+	m_grid = m_grid;
 }
 
 Pathfinder::~Pathfinder() {
