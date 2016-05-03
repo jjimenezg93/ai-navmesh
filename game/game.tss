@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<ArrayOfArrayOfArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ArrayOfArrayOfString>
+    <ArrayOfString>
+      <string>D:\studies\master\subject\AI\practices\pathfinding\game\sample\test.lua</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>D:\studies\master\subject\AI\practices\pathfinding\game\pathfinding\pathfinder.cpp</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>D:\studies\master\subject\AI\practices\pathfinding\game\grid.cpp</string>
+    </ArrayOfString>
+  </ArrayOfArrayOfString>
+  <ArrayOfArrayOfString>
+    <ArrayOfString>
+      <string>D:\studies\master\subject\AI\practices\pathfinding\game\grid.h</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>D:\studies\master\subject\AI\practices\pathfinding\game\pathfinding\pathfinder.h</string>
+    </ArrayOfString>
+  </ArrayOfArrayOfString>
+</ArrayOfArrayOfArrayOfString>
