@@ -23,12 +23,9 @@ Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{gridFilename} {
 		}
 	}
 
-	USVec2D v(m_StartPosition.mX, m_StartPosition.mY);
-	m_startNode = new PathNode(v, 0, nullptr);
-
-	v.mX = m_EndPosition.mX;
+	/*v.mX = m_EndPosition.mX;
 	v.mY = m_EndPosition.mY;
-	m_endNode = new PathNode(v, 0, nullptr);
+	m_endNode = new PathNode(v, 0, nullptr);*/
 }
 
 Pathfinder::~Pathfinder() {
@@ -36,20 +33,33 @@ Pathfinder::~Pathfinder() {
 }
 
 void Pathfinder::UpdatePath() {
-	m_openNodes.clear();
-	m_closedNodes.clear();
+	if (m_StartPosition.mX >= 0 && m_StartPosition.mY >= 0 && m_EndPosition.mX >= 0
+	&& m_EndPosition.mY >= 0) { //need to check both Start and End positions are at least 0
+		uint8_t pos = m_StartPosition.mX * (m_grid.GetGridWidth() - 1) + m_StartPosition.mY;
+		m_startNode = &m_nodes.at(pos);
 
-	m_openNodes.push_back(m_startNode);
-	while (!m_openNodes.empty()) {
-		PathNode * node = m_openNodes.back();
-		if (node->GetPos().mX == m_endNode->GetPos().mX
-			&& node->GetPos().mY == m_endNode->GetPos().mY) {
-			BuildPath(node);
-		} else {
-			//for next_node in connections
-		}
+		pos = m_EndPosition.mX * (m_grid.GetGridWidth() - 1) + m_EndPosition.mY;
+		m_endNode = &m_nodes.at(pos);
+
+		m_openNodes.clear();
+		m_closedNodes.clear();
+
+		/*m_openNodes.push_back(m_startNode);
+		while (!m_openNodes.empty()) {
+			PathNode * node = m_openNodes.back();
+			if (node->GetPos().mX == m_endNode->GetPos().mX
+				&& node->GetPos().mY == m_endNode->GetPos().mY) {
+				BuildPath(node);
+			} else {
+				//with 2 for loops from -1 to 1, we iterate over all adjacent nodes
+				for (int8_t x = -1; x <= 1; ++x) {
+					for (int8_t y = -1; y <= 1; ++y) {
+						m_nodes.
+					}
+				}
+			}
+		}*/
 	}
-
 }
 
 void Pathfinder::BuildPath(PathNode * lastNode) {
@@ -120,8 +130,8 @@ void Pathfinder::RegisterLuaFuncs(MOAILuaState& state) {
 int Pathfinder::_setStartPosition(lua_State* L) {
 	MOAI_LUA_SETUP(Pathfinder, "U")
 
-		float pX = state.GetValue<float>(3, 0.0f);
-	float pY = state.GetValue<float>(2, 0.0f);
+		float pX = state.GetValue<float>(2, 0.0f);
+	float pY = state.GetValue<float>(3, 0.0f);
 	self->SetStartPosition(pX, pY);
 	return 0;
 }
@@ -129,8 +139,8 @@ int Pathfinder::_setStartPosition(lua_State* L) {
 int Pathfinder::_setEndPosition(lua_State* L) {
 	MOAI_LUA_SETUP(Pathfinder, "U")
 
-		float pX = state.GetValue<float>(3, 0.0f);
-	float pY = state.GetValue<float>(2, 0.0f);
+		float pX = state.GetValue<float>(2, 0.0f);
+	float pY = state.GetValue<float>(3, 0.0f);
 	self->SetEndPosition(pX, pY);
 	return 0;
 }
