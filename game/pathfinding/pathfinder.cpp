@@ -10,22 +10,20 @@ Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{gridFilename} {
 		RTTI_EXTEND(MOAIEntity2D)
 	RTTI_END
 
-	m_grid.IsObstacle(5, 5);
+	//fill m_nodes
 	uint16_t gridRows = m_grid.GetGridWidth();
-
-	for (uint16_t i = 0; i < gridRows - 1; ++i) {
-		for (uint16_t j = 0; j < gridRows - 1; ++j) {
-			if (!m_grid.IsObstacle(i, j)) {
-				USVec2D v(i, j);
-				PathNode node(v, 0, nullptr);
-				m_nodes.push_back(node);
-			}
+	int16_t cost = 0;
+	for (uint16_t y = 0; y < gridRows; ++y) {
+		for (uint16_t x = 0; x < gridRows; ++x) {
+			if (m_grid.IsObstacle(x, y)) {
+				cost = -1;
+			} else
+				cost = 0;
+			USVec2D v(x, y);
+			PathNode node(v, cost, nullptr);
+			m_nodes.push_back(node);
 		}
 	}
-
-	/*v.mX = m_EndPosition.mX;
-	v.mY = m_EndPosition.mY;
-	m_endNode = new PathNode(v, 0, nullptr);*/
 }
 
 Pathfinder::~Pathfinder() {
@@ -35,18 +33,18 @@ Pathfinder::~Pathfinder() {
 void Pathfinder::UpdatePath() {
 	if (m_StartPosition.mX >= 0 && m_StartPosition.mY >= 0 && m_EndPosition.mX >= 0
 	&& m_EndPosition.mY >= 0) { //need to check both Start and End positions are at least 0
-		uint8_t pos = m_StartPosition.mX * (m_grid.GetGridWidth() - 1) + m_StartPosition.mY;
+		//set StartNode and EndNode
+		uint8_t pos = m_StartPosition.mX + m_StartPosition.mY * m_grid.GetGridWidth();
 		m_startNode = &m_nodes.at(pos);
-
-		pos = m_EndPosition.mX * (m_grid.GetGridWidth() - 1) + m_EndPosition.mY;
+		pos = m_EndPosition.mX + m_EndPosition.mY  * m_grid.GetGridWidth();
 		m_endNode = &m_nodes.at(pos);
 
+		//A*
 		m_openNodes.clear();
 		m_closedNodes.clear();
-
-		/*m_openNodes.push_back(m_startNode);
+		m_openNodes.push_back(m_startNode);
 		while (!m_openNodes.empty()) {
-			PathNode * node = m_openNodes.back();
+			PathNode * node = m_openNodes.at(0);
 			if (node->GetPos().mX == m_endNode->GetPos().mX
 				&& node->GetPos().mY == m_endNode->GetPos().mY) {
 				BuildPath(node);
@@ -54,16 +52,40 @@ void Pathfinder::UpdatePath() {
 				//with 2 for loops from -1 to 1, we iterate over all adjacent nodes
 				for (int8_t x = -1; x <= 1; ++x) {
 					for (int8_t y = -1; y <= 1; ++y) {
-						m_nodes.
+						uint16_t pos = (node->GetPos().mX + x) +
+							(node->GetPos().mY + y) * m_grid.GetGridWidth();
+						PathNode * nextNode = &(m_nodes.at(pos));
+						if (find(m_closedNodes.begin(), m_closedNodes.end(), nextNode)
+						!= m_closedNodes.end()) {
+							continue;
+						} else if (find(m_openNodes.begin(), m_openNodes.end(), nextNode)
+						!= m_openNodes.end()) {
+							if (nextNode->GetTotalCost() >
+							node->GetTotalCost() + nextNode->GetCost()) {
+								nextNode->SetTotalCost(node->GetTotalCost() + nextNode->GetCost());
+								nextNode->SetParent(node);
+							}
+						} else {
+							nextNode->SetParent(node);
+							m_openNodes.push_back(nextNode);
+						}
 					}
 				}
+				m_openNodes.erase(find(m_openNodes.begin(), m_openNodes.end(), node));
+				m_closedNodes.push_back(node);
 			}
-		}*/
+		}
 	}
 }
 
 void Pathfinder::BuildPath(PathNode * lastNode) {
 	//iterate over all node parents to get the full path
+	PathNode * node = lastNode;
+	while (node->GetParent()) {
+		m_finalPath.push_back(node);
+		node = node->GetParent();
+	}
+	node = node;
 }
 
 void Pathfinder::DrawDebug() {

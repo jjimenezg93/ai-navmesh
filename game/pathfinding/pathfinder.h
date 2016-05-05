@@ -7,16 +7,19 @@
 
 class PathNode {
 public:
-	PathNode(USVec2D pos, uint16_t cost, PathNode * parent): m_pos(pos), m_currentCost(cost),
-		m_parentNode(parent) {}
+	PathNode(USVec2D pos, int16_t cost, PathNode * parent): m_pos(pos), m_totalCost(cost),
+		m_cost(cost), m_parentNode(parent) {}
 	USVec2D GetPos() const { return m_pos; }
-	uint16_t GetCost() const { return m_currentCost; }
+	int16_t GetTotalCost() const { return m_totalCost; }
+	int16_t GetCost() const { return m_cost; }
 	PathNode * GetParent() const { return m_parentNode; }
-	void SetCost(uint16_t newCost) { m_currentCost = newCost; }
+	void SetTotalCost(uint16_t newCost) { m_totalCost = newCost; }
 	void SetParent(PathNode * newParent) { m_parentNode = newParent; }
 private:
 	USVec2D m_pos;
-	uint16_t m_currentCost; //costs are 10 vertical/horizontal and 14 diagonal
+	//if any cost is -1 -> it's an obstacle
+	int16_t m_totalCost; //accumulated cost of path
+	int16_t m_cost; //own cost, independent of path
 	PathNode * m_parentNode;
 };
 
@@ -47,6 +50,7 @@ private:
 	std::vector<PathNode> m_nodes;
 	std::vector<PathNode *> m_openNodes;
 	std::vector<PathNode *> m_closedNodes;
+	std::vector<PathNode *> m_finalPath;
 
 	// Lua configuration
 public:
