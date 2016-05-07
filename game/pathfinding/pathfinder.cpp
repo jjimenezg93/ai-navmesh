@@ -17,8 +17,9 @@ Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{gridFilename} {
 		for (uint16_t x = 0; x < gridRows; ++x) {
 			if (m_grid.IsObstacle(x, y)) {
 				cost = -1;
-			} else
-				cost = 0;
+			} else {
+				cost = rand() % 10 + 2;
+			}
 			USVec2D v(x, y);
 			PathNode node(v, cost, nullptr);
 			m_nodes.push_back(node);
@@ -42,36 +43,53 @@ void Pathfinder::UpdatePath() {
 		//A*
 		m_openNodes.clear();
 		m_closedNodes.clear();
+		m_startNode->SetCost(0);
+		m_startNode->SetTotalCost(0);
 		m_openNodes.push_back(m_startNode);
 		while (!m_openNodes.empty()) {
-			PathNode * node = m_openNodes.at(0);
+			PathNode * node = *(m_openNodes.begin());
+			m_openNodes.erase(m_openNodes.begin());
 			if (node->GetPos().mX == m_endNode->GetPos().mX
 				&& node->GetPos().mY == m_endNode->GetPos().mY) {
 				BuildPath(node);
 			} else {
 				//with 2 for loops from -1 to 1, we iterate over all adjacent nodes
-				for (int8_t x = -1; x <= 1; ++x) {
-					for (int8_t y = -1; y <= 1; ++y) {
-						uint16_t pos = (node->GetPos().mX + x) +
-							(node->GetPos().mY + y) * m_grid.GetGridWidth();
-						PathNode * nextNode = &(m_nodes.at(pos));
-						if (find(m_closedNodes.begin(), m_closedNodes.end(), nextNode)
-						!= m_closedNodes.end()) {
-							continue;
-						} else if (find(m_openNodes.begin(), m_openNodes.end(), nextNode)
-						!= m_openNodes.end()) {
-							if (nextNode->GetTotalCost() >
-							node->GetTotalCost() + nextNode->GetCost()) {
-								nextNode->SetTotalCost(node->GetTotalCost() + nextNode->GetCost());
-								nextNode->SetParent(node);
+				for (int8_t y = -1; y <= 1; ++y) {
+					for (int8_t x = -1; x <= 1; ++x) {
+						if (node->GetPos().mX + x >= 0
+						&& node->GetPos().mX + x < m_grid.GetGridWidth()
+						&& node->GetPos().mY + y >= 0
+						&& node->GetPos().mY + y < m_grid.GetGridWidth()) {
+							int16_t pos = (node->GetPos().mX + x) +
+								(node->GetPos().mY + y) * m_grid.GetGridWidth();
+							if (pos >= 0 && pos <= m_nodes.size()) {
+								PathNode * nextNode = &(m_nodes.at(pos));
+								//if we check the same node, it will overwrite its parent
+								if (node == nextNode) {
+									continue;
+								} else if (find(m_closedNodes.begin(), m_closedNodes.end(), nextNode)
+								!= m_closedNodes.end()) {
+									continue;
+								} else if (find(m_openNodes.begin(), m_openNodes.end(), nextNode)
+								!= m_openNodes.end()) {
+									if (nextNode->GetCost() != -1 && nextNode->GetTotalCost() >
+									node->GetTotalCost() + nextNode->GetCost()) {
+										nextNode->SetTotalCost(node->GetTotalCost() + nextNode->GetCost());
+										nextNode->SetParent(node);
+									}
+								} else {
+									nextNode->SetParent(node);
+									m_openNodes.push_back(nextNode);
+								}
 							}
-						} else {
-							nextNode->SetParent(node);
-							m_openNodes.push_back(nextNode);
 						}
 					}
 				}
-				m_openNodes.erase(find(m_openNodes.begin(), m_openNodes.end(), node));
+				std::vector<PathNode *>::iterator el = find(m_openNodes.begin(),
+					m_openNodes.end(), node);
+				if (el != m_openNodes.end()) {
+					m_openNodes.erase(el);
+				}
 				m_closedNodes.push_back(node);
 			}
 		}

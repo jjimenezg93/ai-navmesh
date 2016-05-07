@@ -13,7 +13,8 @@ public:
 	int16_t GetTotalCost() const { return m_totalCost; }
 	int16_t GetCost() const { return m_cost; }
 	PathNode * GetParent() const { return m_parentNode; }
-	void SetTotalCost(uint16_t newCost) { m_totalCost = newCost; }
+	void SetTotalCost(int16_t newCost) { m_totalCost = newCost; }
+	void SetCost(int16_t newCost) { m_cost = newCost; }
 	void SetParent(PathNode * newParent) { m_parentNode = newParent; }
 private:
 	USVec2D m_pos;
@@ -29,7 +30,7 @@ public:
 	~Pathfinder();
 
 	virtual void DrawDebug();
-
+	//CONVERT THOSE POSITIONS SET TO ARRAY RANGE
 	void SetStartPosition(float x, float y) { m_StartPosition = USVec2D(x, y); UpdatePath();}
 	void SetEndPosition(float x, float y) { m_EndPosition = USVec2D(x, y); UpdatePath();}
 	const USVec2D& GetStartPosition() const { return m_StartPosition;}
