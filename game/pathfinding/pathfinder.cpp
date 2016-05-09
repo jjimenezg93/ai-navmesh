@@ -2,8 +2,8 @@
 
 #include "pathfinder.h"
 
-const char * gridFilename = "grid_little.txt";
-const uint16_t cellSize = 40; //size of each cell in pixels
+const char * gridFilename = "grid.txt";
+const uint16_t cellSize = 25; //size of each cell in pixels
 
 Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{gridFilename} {
 	RTTI_BEGIN
@@ -18,7 +18,7 @@ Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{gridFilename} {
 			if (m_grid.IsObstacle(x, y)) {
 				cost = -1;
 			} else {
-				cost = rand() % 10 + 2;
+				cost = rand() % 30 + 2;
 			}
 			USVec2D v(x, y);
 			PathNode node(v, cost, nullptr);
@@ -34,6 +34,11 @@ Pathfinder::~Pathfinder() {
 void Pathfinder::UpdatePath() {
 	if (m_StartPosition.mX >= 0 && m_StartPosition.mY >= 0 && m_EndPosition.mX >= 0
 	&& m_EndPosition.mY >= 0) { //need to check both Start and End positions are at least 0
+		//need to set all parents to null before recalculating the path.
+		//if not, there's an infinite loop in BuildPath()
+		for (std::vector<PathNode>::iterator itr = m_nodes.begin(); itr != m_nodes.end(); ++itr) {
+			itr->SetParent(nullptr);
+		}
 		//set StartNode and EndNode
 		uint8_t pos = m_StartPosition.mX + m_StartPosition.mY * m_grid.GetGridWidth();
 		m_startNode = &m_nodes.at(pos);
@@ -64,22 +69,27 @@ void Pathfinder::UpdatePath() {
 								(node->GetPos().mY + y) * m_grid.GetGridWidth();
 							if (pos >= 0 && pos <= m_nodes.size()) {
 								PathNode * nextNode = &(m_nodes.at(pos));
-								//if we check the same node, it will overwrite its parent
-								if (node == nextNode) {
-									continue;
-								} else if (find(m_closedNodes.begin(), m_closedNodes.end(), nextNode)
-								!= m_closedNodes.end()) {
-									continue;
-								} else if (find(m_openNodes.begin(), m_openNodes.end(), nextNode)
-								!= m_openNodes.end()) {
-									if (nextNode->GetCost() != -1 && nextNode->GetTotalCost() >
-									node->GetTotalCost() + nextNode->GetCost()) {
-										nextNode->SetTotalCost(node->GetTotalCost() + nextNode->GetCost());
+								if (nextNode->GetCost() != -1) {
+									//if we check the same node, it will overwrite its parent
+									if (node == nextNode) {
+										continue;
+									} else if (find(m_closedNodes.begin(), m_closedNodes.end(), nextNode)
+									!= m_closedNodes.end()) {
+										continue;
+									} else if (find(m_openNodes.begin(), m_openNodes.end(), nextNode)
+									!= m_openNodes.end()) {
+										/*if (nextNode->GetTotalCost() >
+										node->GetTotalCost() + nextNode->GetCost()) {*/
+										if (nextNode->GetTotalCost() > 0
+										&& nextNode->GetTotalCost() >
+										node->GetTotalCost() + nextNode->GetCost()) {
+											nextNode->SetTotalCost(node->GetTotalCost() + nextNode->GetCost());
+											nextNode->SetParent(node);
+										}
+									} else {
 										nextNode->SetParent(node);
+										m_openNodes.push_back(nextNode);
 									}
-								} else {
-									nextNode->SetParent(node);
-									m_openNodes.push_back(nextNode);
 								}
 							}
 						}
@@ -97,6 +107,7 @@ void Pathfinder::UpdatePath() {
 }
 
 void Pathfinder::BuildPath(PathNode * lastNode) {
+	m_finalPath.clear();
 	//iterate over all node parents to get the full path
 	PathNode * node = lastNode;
 	while (node->GetParent()) {
@@ -119,6 +130,16 @@ void Pathfinder::DrawDebug() {
 
 	MOAIDraw::DrawGrid(r, gridRows, gridRows);
 	USRect fillCell;
+
+	gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 1.0f);
+	for (uint16_t i = 0; i < m_finalPath.size(); ++i) {
+		fillCell.mXMin = static_cast<float>(m_finalPath.at(i)->GetPos().mX * cellSize);
+		fillCell.mYMin = static_cast<float>(m_finalPath.at(i)->GetPos().mY * cellSize);
+		fillCell.mXMax = static_cast<float>(m_finalPath.at(i)->GetPos().mX * cellSize + cellSize);
+		fillCell.mYMax = static_cast<float>(m_finalPath.at(i)->GetPos().mY * cellSize + cellSize);
+		MOAIDraw::DrawRectFill(fillCell);
+	}
+
 	for (uint16_t i = 0; i < gridRows; ++i) {
 		for (uint16_t j = 0; j < gridRows; ++j) {
 			if (m_grid.IsObstacle(i, j)) {
@@ -148,6 +169,29 @@ void Pathfinder::DrawDebug() {
 	MOAIDraw::DrawRectFill(fillCell);
 }
 
+void Pathfinder::InitStartPosition(float x, float y) {
+	m_StartPosition = USVec2D(floor(x), floor(y));
+	UpdatePath();
+}
+
+void Pathfinder::InitEndPosition(float x, float y) {
+	m_EndPosition = USVec2D(floor(x), floor(y));
+	UpdatePath();
+}
+
+void Pathfinder::SetStartPosition(float x, float y) {
+	x /= cellSize;
+	y /= cellSize;
+	m_StartPosition = USVec2D(floor(x), floor(y));
+	UpdatePath();
+}
+void Pathfinder::SetEndPosition(float x, float y) {
+	x /= cellSize;
+	y /= cellSize;
+	m_EndPosition = USVec2D(floor(x), floor(y));
+	UpdatePath();
+}
+
 bool Pathfinder::PathfindStep() {
 	// returns true if pathfinding process finished
 	return true;
@@ -158,6 +202,8 @@ void Pathfinder::RegisterLuaFuncs(MOAILuaState& state) {
 	MOAIEntity::RegisterLuaFuncs(state);
 
 	luaL_Reg regTable[] = {
+		{"initStartPosition", _initStartPosition},
+		{"initEndPosition", _initEndPosition},
 		{"setStartPosition", _setStartPosition},
 		{"setEndPosition", _setEndPosition},
 		{"pathfindStep", _pathfindStep},
@@ -167,10 +213,28 @@ void Pathfinder::RegisterLuaFuncs(MOAILuaState& state) {
 	luaL_register(state, 0, regTable);
 }
 
+int Pathfinder::_initStartPosition(lua_State* L) {
+	MOAI_LUA_SETUP(Pathfinder, "U")
+
+	float pX = state.GetValue<float>(2, 0.0f);
+	float pY = state.GetValue<float>(3, 0.0f);
+	self->InitStartPosition(pX, pY);
+	return 0;
+}
+
+int Pathfinder::_initEndPosition(lua_State* L) {
+	MOAI_LUA_SETUP(Pathfinder, "U")
+
+	float pX = state.GetValue<float>(2, 0.0f);
+	float pY = state.GetValue<float>(3, 0.0f);
+	self->InitEndPosition(pX, pY);
+	return 0;
+}
+
 int Pathfinder::_setStartPosition(lua_State* L) {
 	MOAI_LUA_SETUP(Pathfinder, "U")
 
-		float pX = state.GetValue<float>(2, 0.0f);
+	float pX = state.GetValue<float>(2, 0.0f);
 	float pY = state.GetValue<float>(3, 0.0f);
 	self->SetStartPosition(pX, pY);
 	return 0;
@@ -179,7 +243,7 @@ int Pathfinder::_setStartPosition(lua_State* L) {
 int Pathfinder::_setEndPosition(lua_State* L) {
 	MOAI_LUA_SETUP(Pathfinder, "U")
 
-		float pX = state.GetValue<float>(2, 0.0f);
+	float pX = state.GetValue<float>(2, 0.0f);
 	float pY = state.GetValue<float>(3, 0.0f);
 	self->SetEndPosition(pX, pY);
 	return 0;
@@ -188,6 +252,6 @@ int Pathfinder::_setEndPosition(lua_State* L) {
 int Pathfinder::_pathfindStep(lua_State* L) {
 	MOAI_LUA_SETUP(Pathfinder, "U")
 
-		self->PathfindStep();
+	self->PathfindStep();
 	return 0;
 }

@@ -30,9 +30,12 @@ public:
 	~Pathfinder();
 
 	virtual void DrawDebug();
-	//CONVERT THOSE POSITIONS SET TO ARRAY RANGE
-	void SetStartPosition(float x, float y) { m_StartPosition = USVec2D(x, y); UpdatePath();}
-	void SetEndPosition(float x, float y) { m_EndPosition = USVec2D(x, y); UpdatePath();}
+	//those two methods receive grid coordinates
+	void InitStartPosition(float x, float y);
+	void InitEndPosition(float x, float y);
+	//setters receive screen coordinates -> convert them to grid coords
+	void SetStartPosition(float x, float y);
+	void SetEndPosition(float x, float y);
 	const USVec2D& GetStartPosition() const { return m_StartPosition;}
 	const USVec2D& GetEndPosition() const { return m_EndPosition;}
 
@@ -59,6 +62,8 @@ public:
 public:
 	virtual void RegisterLuaFuncs(MOAILuaState& state);
 private:
+	static int _initStartPosition(lua_State* L);
+	static int _initEndPosition(lua_State* L);
 	static int _setStartPosition(lua_State* L);
 	static int _setEndPosition(lua_State* L);
     static int _pathfindStep(lua_State* L);
