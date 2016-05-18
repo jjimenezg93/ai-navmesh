@@ -38,7 +38,7 @@ pathfinder = Pathfinder.new()
 --pathfinder:setStartPosition(1, 1)
 pathfinder:initStartPosition(0, 1)
 --pathfinder:setStartPosition(6, 6)
-pathfinder:initEndPosition(5, 7)
+pathfinder:initEndPosition(2, 2)
 MOAIDrawDebug.insertEntity(pathfinder)
 
 mouseX = 0

@@ -7,20 +7,23 @@
 
 class PathNode {
 public:
-	PathNode(USVec2D pos, int16_t cost, PathNode * parent): m_pos(pos), m_totalCost(cost),
-		m_cost(cost), m_parentNode(parent) {}
+	PathNode(USVec2D pos, float cost, float estimCost, PathNode * parent): m_pos(pos), m_totalCost(cost + estimCost),
+		m_cost(cost + estimCost), m_estimatedCost(estimCost), m_parentNode(parent) {}
 	USVec2D GetPos() const { return m_pos; }
-	int16_t GetTotalCost() const { return m_totalCost; }
-	int16_t GetCost() const { return m_cost; }
+	float GetTotalCost() const { return m_totalCost; }
+	float GetCost() const { return m_cost; }
+	float GetEstimated() const { return m_estimatedCost; }
 	PathNode * GetParent() const { return m_parentNode; }
-	void SetTotalCost(int16_t newCost) { m_totalCost = newCost; }
-	void SetCost(int16_t newCost) { m_cost = newCost; }
+	void SetTotalCost(float newCost) { m_totalCost = newCost; }
+	void SetCost(float newCost) { m_cost = newCost; }
+	void SetEstimatedCost(float newCost) { m_estimatedCost = newCost; }
 	void SetParent(PathNode * newParent) { m_parentNode = newParent; }
 private:
 	USVec2D m_pos;
 	//if any cost is -1 -> it's an obstacle
-	int16_t m_totalCost; //accumulated cost of path
-	int16_t m_cost; //own cost, independent of path
+	float m_totalCost; //accumulated cost of path
+	float m_cost; //own cost, independent of path
+	float m_estimatedCost;
 	PathNode * m_parentNode;
 };
 

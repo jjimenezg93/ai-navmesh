@@ -31,7 +31,7 @@ Grid::Grid(const char * filename) {
 				m_gridWidth = x;
 			}
 			x = 0;
-			i++; //manually pass \n
+			//i++; //manually pass \n
 			y++;
 			continue;
 		}

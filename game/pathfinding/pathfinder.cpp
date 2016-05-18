@@ -18,10 +18,10 @@ Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{gridFilename} {
 			if (m_grid.IsObstacle(x, y)) {
 				cost = -1;
 			} else {
-				cost = rand() % 30 + 2;
+				cost = rand() % 3000 + 500;
 			}
 			USVec2D v(x, y);
-			PathNode node(v, cost, nullptr);
+			PathNode node(v, cost, 0, nullptr);
 			m_nodes.push_back(node);
 		}
 	}
@@ -39,11 +39,31 @@ void Pathfinder::UpdatePath() {
 		for (std::vector<PathNode>::iterator itr = m_nodes.begin(); itr != m_nodes.end(); ++itr) {
 			itr->SetParent(nullptr);
 		}
+
 		//set StartNode and EndNode
 		uint8_t pos = m_StartPosition.mX + m_StartPosition.mY * m_grid.GetGridWidth();
 		m_startNode = &m_nodes.at(pos);
 		pos = m_EndPosition.mX + m_EndPosition.mY  * m_grid.GetGridWidth();
 		m_endNode = &m_nodes.at(pos);
+
+		//recalculate all estimated costs
+		uint16_t gridRows = m_grid.GetGridWidth();
+		int16_t cost = 0;
+		PathNode * node;
+		for (uint16_t y = 0; y < gridRows; ++y) {
+			for (uint16_t x = 0; x < gridRows; ++x) {
+				node = &(m_nodes.at(x + y * m_grid.GetGridWidth()));
+				if (node->GetCost() != -1) {
+					//estimated based on pixels distance
+					float cost = node->GetCost();
+					float estimated = (sqrt(pow((m_endNode->GetPos().mX - x)* cellSize, 2)
+						+ pow((m_endNode->GetPos().mY - y)* cellSize, 2)));
+					node->SetEstimatedCost(estimated);
+					node->SetCost(cost + estimated);
+					node->SetTotalCost(cost + estimated);
+				}
+			}
+		}
 
 		//A*
 		m_openNodes.clear();
@@ -51,7 +71,8 @@ void Pathfinder::UpdatePath() {
 		m_startNode->SetCost(0);
 		m_startNode->SetTotalCost(0);
 		m_openNodes.push_back(m_startNode);
-		while (!m_openNodes.empty()) {
+		bool objectiveFound = false;
+		while (!m_openNodes.empty() && !objectiveFound) {
 			PathNode * node = *(m_openNodes.begin());
 			m_openNodes.erase(m_openNodes.begin());
 			if (node->GetPos().mX == m_endNode->GetPos().mX
@@ -69,6 +90,16 @@ void Pathfinder::UpdatePath() {
 								(node->GetPos().mY + y) * m_grid.GetGridWidth();
 							if (pos >= 0 && pos <= m_nodes.size()) {
 								PathNode * nextNode = &(m_nodes.at(pos));
+								
+								//if nextNode == objective -> buildPath and terminate A*
+								if (nextNode->GetPos().mX == m_endNode->GetPos().mX
+								&& nextNode->GetPos().mY == m_endNode->GetPos().mY) {
+									nextNode->SetParent(node);
+									nextNode->SetTotalCost(node->GetTotalCost() + nextNode->GetCost());
+									BuildPath(nextNode);
+									objectiveFound = true;
+									break;
+								}
 								if (nextNode->GetCost() != -1) {
 									//if we check the same node, it will overwrite its parent
 									if (node == nextNode) {
@@ -78,8 +109,6 @@ void Pathfinder::UpdatePath() {
 										continue;
 									} else if (find(m_openNodes.begin(), m_openNodes.end(), nextNode)
 									!= m_openNodes.end()) {
-										/*if (nextNode->GetTotalCost() >
-										node->GetTotalCost() + nextNode->GetCost()) {*/
 										if (nextNode->GetTotalCost() > 0
 										&& nextNode->GetTotalCost() >
 										node->GetTotalCost() + nextNode->GetCost()) {
