@@ -1,0 +1,92 @@
+<navmesh>
+	<polygons>
+		<polygon>
+			<point x="-10.96886" y ="-10.73738"/>
+			<point x="40.49832" y ="-10.91151"/>
+			<point x="26.90898" y ="70.77089"/>
+			<point x="-0.2696825" y ="68.09278"/>
+		</polygon>
+		<polygon>
+			<point x="-17.2675" y ="-87.7396"/>
+			<point x="44.85517" y ="-84.39196"/>
+			<point x="40.61514" y ="-11.07214"/>
+			<point x="-10.53102" y ="-10.91151"/>
+		</polygon>
+		<polygon>
+			<point x="-13.6627" y ="-184.0802"/>
+			<point x="39.30796" y ="-182.7411"/>
+			<point x="45.3213" y ="-84.50259"/>
+			<point x="-16.96469" y ="-87.69551"/>
+		</polygon>
+		<polygon>
+			<point x="-108.5102" y ="-76.35763"/>
+			<point x="-17.41269" y ="-88.41654"/>
+			<point x="-10.38458" y ="-9.643789"/>
+			<point x="-80.93404" y ="-7.566976"/>
+		</polygon>
+		<polygon>
+			<point x="-93.64054" y ="-159.4832"/>
+			<point x="-13.73545" y ="-184.846"/>
+			<point x="-17.05608" y ="-88.57354"/>
+			<point x="-110.2805" y ="-75.7922"/>
+		</polygon>
+		<polygon>
+			<point x="45.02263" y ="-85.22362"/>
+			<point x="117.6426" y ="-71.26881"/>
+			<point x="99.02464" y ="-8.098945"/>
+			<point x="40.58659" y ="-10.34178"/>
+		</polygon>
+		<polygon>
+			<point x="38.8573" y ="-184.803"/>
+			<point x="126.9543" y ="-139.6015"/>
+			<point x="116.852" y ="-71.52405"/>
+			<point x="45.47063" y ="-85.04337"/>
+		</polygon>
+		<polygon>
+			<point x="117.6956" y ="-71.46415"/>
+			<point x="163.2075" y ="-49.03856"/>
+			<point x="135.6875" y ="12.50651"/>
+			<point x="98.78079" y ="-7.579331"/>
+		</polygon>
+		<polygon>
+			<point x="126.6556" y ="-138.7002"/>
+			<point x="177.429" y ="-112.0221"/>
+			<point x="163.541" y ="-48.7517"/>
+			<point x="117.0983" y ="-71.64441"/>
+		</polygon>
+	</polygons>
+	<links>
+		<link>
+			<start polygon="2" edgestart="3" edgeend="0"/>
+			<end polygon="4" edgestart="1" edgeend="2"/>
+		</link>
+		<link>
+			<start polygon="2" edgestart="1" edgeend="2"/>
+			<end polygon="6" edgestart="3" edgeend="0"/>
+		</link>
+		<link>
+			<start polygon="5" edgestart="0" edgeend="1"/>
+			<end polygon="6" edgestart="2" edgeend="3"/>
+		</link>
+		<link>
+			<start polygon="1" edgestart="1" edgeend="2"/>
+			<end polygon="5" edgestart="3" edgeend="0"/>
+		</link>
+		<link>
+			<start polygon="1" edgestart="0" edgeend="1"/>
+			<end polygon="2" edgestart="2" edgeend="3"/>
+		</link>
+		<link>
+			<start polygon="3" edgestart="0" edgeend="1"/>
+			<end polygon="4" edgestart="2" edgeend="3"/>
+		</link>
+		<link>
+			<start polygon="1" edgestart="3" edgeend="0"/>
+			<end polygon="3" edgestart="1" edgeend="2"/>
+		</link>
+		<link>
+			<start polygon="0" edgestart="0" edgeend="1"/>
+			<end polygon="1" edgestart="2" edgeend="3"/>
+		</link>
+	</links>
+</navmesh>

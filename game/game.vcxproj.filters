@@ -20,6 +20,7 @@
       <Filter>pathfinder</Filter>
     </ClCompile>
     <ClCompile Include="grid.cpp" />
+    <ClCompile Include="navmesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="character.h" />
@@ -38,6 +39,7 @@
       <Filter>pathfinder</Filter>
     </ClInclude>
     <ClInclude Include="grid.h" />
+    <ClInclude Include="navmesh.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="host">

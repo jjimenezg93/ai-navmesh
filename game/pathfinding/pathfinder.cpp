@@ -1,29 +1,23 @@
 #include <stdafx.h>
 
 #include "pathfinder.h"
+#include "navmesh.h"
 
-const char * gridFilename = "grid.txt";
-const uint16_t cellSize = 25; //size of each cell in pixels
+const char * navmeshFilename = "navmesh.xml";
+//const uint16_t cellSize = 25; //size of each cell in pixels
 
-Pathfinder::Pathfinder(): MOAIEntity2D(), m_grid{gridFilename} {
+Pathfinder::Pathfinder(): MOAIEntity2D(), m_navmesh{navmeshFilename} {
 	RTTI_BEGIN
 		RTTI_EXTEND(MOAIEntity2D)
 	RTTI_END
 
 	//fill m_nodes
-	uint16_t gridRows = m_grid.GetGridWidth();
+	uint16_t numPolygons = m_navmesh.GetNumPolygons();
 	int16_t cost = 0;
-	for (uint16_t y = 0; y < gridRows; ++y) {
-		for (uint16_t x = 0; x < gridRows; ++x) {
-			if (m_grid.IsObstacle(x, y)) {
-				cost = -1;
-			} else {
-				cost = rand() % 3000 + 500;
-			}
-			USVec2D v(x, y);
-			PathNode node(v, cost, 0, nullptr);
-			m_nodes.push_back(node);
-		}
+	for (uint16_t index = 0; index < numPolygons; ++index) {
+		cost = rand() % 3000 + 500;
+		PathNode node(m_navmesh.GetPolygon(index), cost, 0, nullptr);
+		m_nodes.push_back(node);
 	}
 }
 
@@ -36,7 +30,7 @@ void Pathfinder::UpdatePath() {
 	&& m_EndPosition.mY >= 0) { //need to check both Start and End positions are at least 0
 		//need to set all parents to null before recalculating the path.
 		//if not, there's an infinite loop in BuildPath()
-		for (std::vector<PathNode>::iterator itr = m_nodes.begin(); itr != m_nodes.end(); ++itr) {
+		/*for (std::vector<PathNode>::iterator itr = m_nodes.begin(); itr != m_nodes.end(); ++itr) {
 			itr->SetParent(nullptr);
 		}
 
@@ -131,7 +125,7 @@ void Pathfinder::UpdatePath() {
 				}
 				m_closedNodes.push_back(node);
 			}
-		}
+		}*/
 	}
 }
 
@@ -150,7 +144,21 @@ void Pathfinder::DrawDebug() {
 	MOAIGfxDevice& gfxDevice = MOAIGfxDevice::Get();
 
 	gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 1.0f);
-	uint16_t gridRows = m_grid.GetGridWidth(); //also cols -> squared
+	uint16_t numPolygons = m_navmesh.GetNumPolygons();
+	Polygon * polygon;
+	for (uint16_t i = 0; i < numPolygons; ++i) {
+		polygon = m_navmesh.GetPolygon(i);
+		gfxDevice.SetPenColor(0.0f, 0.0f, 1.0f, 0.1f);
+		MOAIDraw::DrawPolygonFilled(polygon->m_vertices);
+		gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 0.7f);
+		MOAIDraw::DrawPolygon(polygon->m_vertices);
+	}
+
+	gfxDevice.SetPenColor(0.0f, 1.0f, 0.0f, 1.f);
+	MOAIDraw::DrawEllipseFill(m_StartPosition.mX, m_StartPosition.mY, 5, 5, 32);
+	gfxDevice.SetPenColor(1.0f, 0.0f, 1.0f, 1.f);
+	MOAIDraw::DrawEllipseFill(m_EndPosition.mX, m_EndPosition.mY, 5, 5, 32);
+	/*uint16_t gridRows = m_grid.GetGridWidth(); //also cols -> squared
 	USRect r;
 	r.mXMin = 0.f;
 	r.mYMin = 0.f;
@@ -195,29 +203,25 @@ void Pathfinder::DrawDebug() {
 	fillCell.mXMax = static_cast<float>(m_EndPosition.mX * cellSize + cellSize);
 	fillCell.mYMax = static_cast<float>(m_EndPosition.mY * cellSize + cellSize);
 	gfxDevice.SetPenColor(0.0f, 0.0f, 1.0f, 1.0f);
-	MOAIDraw::DrawRectFill(fillCell);
+	MOAIDraw::DrawRectFill(fillCell);*/
 }
 
 void Pathfinder::InitStartPosition(float x, float y) {
-	m_StartPosition = USVec2D(floor(x), floor(y));
+	m_StartPosition = USVec2D(x, y);
 	UpdatePath();
 }
 
 void Pathfinder::InitEndPosition(float x, float y) {
-	m_EndPosition = USVec2D(floor(x), floor(y));
+	m_EndPosition = USVec2D(x, y);
 	UpdatePath();
 }
 
 void Pathfinder::SetStartPosition(float x, float y) {
-	x /= cellSize;
-	y /= cellSize;
-	m_StartPosition = USVec2D(floor(x), floor(y));
+	m_StartPosition = USVec2D(x, y);
 	UpdatePath();
 }
 void Pathfinder::SetEndPosition(float x, float y) {
-	x /= cellSize;
-	y /= cellSize;
-	m_EndPosition = USVec2D(floor(x), floor(y));
+	m_EndPosition = USVec2D(x, y);
 	UpdatePath();
 }
 

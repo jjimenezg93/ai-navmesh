@@ -3,23 +3,28 @@
 
 #include <moaicore/MOAIEntity2D.h>
 
-#include "../grid.h"
+#include "../navmesh.h"
+
+class Polygon;
 
 class PathNode {
 public:
-	PathNode(USVec2D pos, float cost, float estimCost, PathNode * parent): m_pos(pos), m_totalCost(cost + estimCost),
-		m_cost(cost + estimCost), m_estimatedCost(estimCost), m_parentNode(parent) {}
-	USVec2D GetPos() const { return m_pos; }
+	PathNode(Polygon * pol, float cost, float estimCost, PathNode * parent): m_polygon(pol),
+		m_totalCost(cost + estimCost), m_cost(cost + estimCost),
+		m_estimatedCost(estimCost), m_parentNode(parent) {}
+	USVec2D GetPos() const { return m_centre; }
 	float GetTotalCost() const { return m_totalCost; }
 	float GetCost() const { return m_cost; }
 	float GetEstimated() const { return m_estimatedCost; }
 	PathNode * GetParent() const { return m_parentNode; }
+	Polygon * GetPolygon() const { return m_polygon; }
 	void SetTotalCost(float newCost) { m_totalCost = newCost; }
 	void SetCost(float newCost) { m_cost = newCost; }
 	void SetEstimatedCost(float newCost) { m_estimatedCost = newCost; }
 	void SetParent(PathNode * newParent) { m_parentNode = newParent; }
 private:
-	USVec2D m_pos;
+	Polygon * m_polygon;
+	USVec2D m_centre;
 	//if any cost is -1 -> it's an obstacle
 	float m_totalCost; //accumulated cost of path
 	float m_cost; //own cost, independent of path
@@ -51,7 +56,7 @@ private:
 	USVec2D m_StartPosition;
 	USVec2D m_EndPosition;
 
-	Grid m_grid;
+	Navmesh m_navmesh;
 	PathNode * m_startNode;
 	PathNode * m_endNode;
 	std::vector<PathNode> m_nodes;
