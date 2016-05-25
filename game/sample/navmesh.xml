@@ -61,32 +61,44 @@
 			<end polygon="4" edgestart="1" edgeend="2"/>
 		</link>
 		<link>
-			<start polygon="2" edgestart="1" edgeend="2"/>
-			<end polygon="6" edgestart="3" edgeend="0"/>
-		</link>
-		<link>
-			<start polygon="5" edgestart="0" edgeend="1"/>
-			<end polygon="6" edgestart="2" edgeend="3"/>
-		</link>
-		<link>
-			<start polygon="1" edgestart="1" edgeend="2"/>
-			<end polygon="5" edgestart="3" edgeend="0"/>
-		</link>
-		<link>
 			<start polygon="1" edgestart="0" edgeend="1"/>
 			<end polygon="2" edgestart="2" edgeend="3"/>
-		</link>
-		<link>
-			<start polygon="3" edgestart="0" edgeend="1"/>
-			<end polygon="4" edgestart="2" edgeend="3"/>
 		</link>
 		<link>
 			<start polygon="1" edgestart="3" edgeend="0"/>
 			<end polygon="3" edgestart="1" edgeend="2"/>
 		</link>
 		<link>
+			<start polygon="3" edgestart="0" edgeend="1"/>
+			<end polygon="4" edgestart="2" edgeend="3"/>
+		</link>
+		<link>
 			<start polygon="0" edgestart="0" edgeend="1"/>
 			<end polygon="1" edgestart="2" edgeend="3"/>
+		</link>
+		<link>
+			<start polygon="1" edgestart="1" edgeend="2"/>
+			<end polygon="5" edgestart="3" edgeend="0"/>
+		</link>
+		<link>
+			<start polygon="5" edgestart="0" edgeend="1"/>
+			<end polygon="6" edgestart="2" edgeend="3"/>
+		</link>
+		<link>
+			<start polygon="2" edgestart="1" edgeend="2"/>
+			<end polygon="6" edgestart="3" edgeend="0"/>
+		</link>
+		<link>
+			<start polygon="6" edgestart="1" edgeend="2"/>
+			<end polygon="8" edgestart="3" edgeend="0"/>
+		</link>
+		<link>
+			<start polygon="7" edgestart="0" edgeend="1"/>
+			<end polygon="8" edgestart="2" edgeend="3"/>
+		</link>
+		<link>
+			<start polygon="5" edgestart="1" edgeend="2"/>
+			<end polygon="7" edgestart="3" edgeend="0"/>
 		</link>
 	</links>
 </navmesh>

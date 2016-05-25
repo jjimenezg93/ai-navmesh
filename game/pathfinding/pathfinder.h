@@ -9,10 +9,11 @@ class Polygon;
 
 class PathNode {
 public:
-	PathNode(Polygon * pol, float cost, float estimCost, PathNode * parent): m_polygon(pol),
-		m_totalCost(cost + estimCost), m_cost(cost + estimCost),
+	PathNode(Polygon * pol, float cost, float estimCost, PathNode * parent = nullptr):
+		m_polygon(pol),	m_totalCost(cost + estimCost), m_cost(cost + estimCost),
 		m_estimatedCost(estimCost), m_parentNode(parent) {}
 	USVec2D GetPos() const { return m_centre; }
+	void SetCentrePos(USVec2D &pos) { m_centre = pos; }
 	float GetTotalCost() const { return m_totalCost; }
 	float GetCost() const { return m_cost; }
 	float GetEstimated() const { return m_estimatedCost; }
@@ -52,6 +53,8 @@ private:
 	void UpdatePath();
 private:
 	void BuildPath(PathNode * lastNode);
+
+	PathNode * NearestNode(USVec2D &point);
 
 	USVec2D m_StartPosition;
 	USVec2D m_EndPosition;
