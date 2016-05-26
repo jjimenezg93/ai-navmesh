@@ -123,6 +123,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="aligntomovement_steering.cpp" />
+    <ClCompile Include="align_steering.cpp" />
     <ClCompile Include="character.cpp" />
     <ClCompile Include="gameConfig.cpp" />
     <ClCompile Include="grid.cpp" />
@@ -131,12 +133,20 @@
     <ClCompile Include="host\GlutHostMain.cpp" />
     <ClCompile Include="host\ParticlePresets.cpp" />
     <ClCompile Include="navmesh.cpp" />
+    <ClCompile Include="obstacleavoidance_steering.cpp" />
+    <ClCompile Include="obstaclepath_steering.cpp" />
+    <ClCompile Include="params.cpp" />
     <ClCompile Include="pathfinding\pathfinder.cpp" />
+    <ClCompile Include="pathfollowing_steering.cpp" />
+    <ClCompile Include="seek_steering.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="steering.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aligntomovement_steering.h" />
+    <ClInclude Include="align_steering.h" />
     <ClInclude Include="character.h" />
     <ClInclude Include="gameConfig.h" />
     <ClInclude Include="grid.h" />
@@ -144,8 +154,14 @@
     <ClInclude Include="host\GlutHost.h" />
     <ClInclude Include="host\ParticlePresets.h" />
     <ClInclude Include="navmesh.h" />
+    <ClInclude Include="obstacleavoidance_steering.h" />
+    <ClInclude Include="obstaclepath_steering.h" />
+    <ClInclude Include="params.h" />
     <ClInclude Include="pathfinding\pathfinder.h" />
+    <ClInclude Include="pathfollowing_steering.h" />
+    <ClInclude Include="seek_steering.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="steering.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="sample\test.lua" />

@@ -36,7 +36,6 @@ private:
 class Pathfinder: public virtual MOAIEntity2D {
 public:
 	static Pathfinder &Instance();
-
 	Pathfinder();
 	~Pathfinder();
 
@@ -50,11 +49,14 @@ public:
 	const USVec2D& GetStartPosition() const { return m_StartPosition;}
 	const USVec2D& GetEndPosition() const { return m_EndPosition;}
 
+	const std::vector<USVec2D> &GetPath() const;
+
     bool PathfindStep();
 private:
 	void UpdatePath();
-private:
 	void BuildPath(PathNode * lastNode);
+
+	static Pathfinder * m_pathfinder;
 
 	PathNode * NearestNode(USVec2D &point);
 

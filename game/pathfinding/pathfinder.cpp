@@ -5,11 +5,20 @@
 
 const char * navmeshFilename = "navmesh.xml";
 
+Pathfinder * Pathfinder::m_pathfinder = nullptr;
+
+Pathfinder &Pathfinder::Instance() {
+	if (!m_pathfinder)
+		m_pathfinder = new Pathfinder();
+	return *m_pathfinder;
+}
+
 Pathfinder::Pathfinder(): MOAIEntity2D(), m_navmesh{navmeshFilename} {
 	RTTI_BEGIN
 		RTTI_EXTEND(MOAIEntity2D)
-	RTTI_END
+		RTTI_END
 
+	m_pathfinder = this;
 	//fill m_nodes
 	uint16_t numPolygons = m_navmesh.GetNumPolygons();
 	float cost = 0;
@@ -27,6 +36,10 @@ Pathfinder::Pathfinder(): MOAIEntity2D(), m_navmesh{navmeshFilename} {
 
 Pathfinder::~Pathfinder() {
 
+}
+
+const std::vector<USVec2D> &Pathfinder::GetPath() const {
+	return m_edgesPath;
 }
 
 PathNode * Pathfinder::NearestNode(USVec2D &point) {
@@ -160,26 +173,25 @@ void Pathfinder::BuildPath(PathNode * lastNode) {
 void Pathfinder::DrawDebug() {
 	MOAIGfxDevice& gfxDevice = MOAIGfxDevice::Get();
 
-	gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 1.0f);
 	uint16_t numPolygons = m_navmesh.GetNumPolygons();
 	Polygon * polygon;
 	for (uint16_t i = 0; i < numPolygons; ++i) {
 		polygon = m_navmesh.GetPolygon(i);
 		gfxDevice.SetPenColor(0.0f, 0.0f, 1.0f, 0.1f);
 		MOAIDraw::DrawPolygonFilled(polygon->m_vertices);
-		gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 0.4f);
+		gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 0.1f);
 		MOAIDraw::DrawPolygon(polygon->m_vertices);
 	}
 
-	gfxDevice.SetPenColor(0.0f, 1.0f, 0.0f, 0.4f);
+	gfxDevice.SetPenColor(0.0f, 1.0f, 0.0f, 0.1f);
 	MOAIDraw::DrawEllipseFill(m_StartPosition.mX, m_StartPosition.mY, 5, 5, 32);
-	gfxDevice.SetPenColor(1.0f, 0.0f, 1.0f, 0.4f);
+	gfxDevice.SetPenColor(1.0f, 0.0f, 1.0f, 0.1f);
 	MOAIDraw::DrawEllipseFill(m_EndPosition.mX, m_EndPosition.mY, 5, 5, 32);
 
-	//draw Polyogons path
+	//draw Polygons path
 	for (std::vector<PathNode *>::iterator pathItr = m_finalPath.begin();
 	pathItr != m_finalPath.end(); ++pathItr) {
-		gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 0.5f);
+		gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 0.1f);
 		MOAIDraw::DrawPolygonFilled((*pathItr)->GetPolygon()->m_vertices);
 	}
 
@@ -187,16 +199,16 @@ void Pathfinder::DrawDebug() {
 	std::vector<USVec2D>::iterator edgeItr = m_edgesPath.begin();
 	uint16_t edgeIt = 0;
 	while (edgeIt < m_edgesPath.size() - 1) {
-		gfxDevice.SetPenColor(1.0f, 0.0f, 0.0f, 0.4f);
+		gfxDevice.SetPenColor(1.0f, 0.0f, 0.0f, 0.1f);
 		MOAIDraw::DrawLine(m_edgesPath.at(edgeIt), m_edgesPath.at(edgeIt++));
 	}
 
 	//startNode
-	gfxDevice.SetPenColor(0.0f, 1.0f, 0.0f, 0.5f);
+	gfxDevice.SetPenColor(0.0f, 1.0f, 0.0f, 0.1f);
 	MOAIDraw::DrawPolygonFilled(m_startNode->GetPolygon()->m_vertices);
 
 	//endNode
-	gfxDevice.SetPenColor(1.0f, 0.0f, 1.0f, 0.5f);
+	gfxDevice.SetPenColor(1.0f, 0.0f, 1.0f, 0.1f);
 	MOAIDraw::DrawPolygonFilled(m_endNode->GetPolygon()->m_vertices);
 }
 
