@@ -4,15 +4,14 @@
 #include "navmesh.h"
 
 const char * navmeshFilename = "navmesh.xml";
-//const uint16_t cellSize = 25; //size of each cell in pixels
 
 Pathfinder::Pathfinder(): MOAIEntity2D(), m_navmesh{navmeshFilename} {
 	RTTI_BEGIN
 		RTTI_EXTEND(MOAIEntity2D)
-		RTTI_END
+	RTTI_END
 
-		//fill m_nodes
-		uint16_t numPolygons = m_navmesh.GetNumPolygons();
+	//fill m_nodes
+	uint16_t numPolygons = m_navmesh.GetNumPolygons();
 	float cost = 0;
 	USVec2D diagonal;
 	float centreDist;
@@ -134,10 +133,25 @@ void Pathfinder::UpdatePath() {
 
 void Pathfinder::BuildPath(PathNode * lastNode) {
 	m_finalPath.clear();
+	m_edgesPath.clear();
 	//iterate over all node parents to get the full path
 	PathNode * node = lastNode;
+	USVec2D edgeDir;
+	USVec2D edgePos;
+	float edgeLength;
 	while (node->GetParent()) {
 		m_finalPath.push_back(node);
+		for (std::vector<Polygon::Edge>::iterator itr = node->GetPolygon()->m_edges.begin();
+		itr != node->GetPolygon()->m_edges.end(); ++itr) {
+			if (itr->m_neighbour == node->GetParent()->GetPolygon()) {
+				edgeDir = node->GetPolygon()->m_vertices[itr->m_verticesID[1]]
+					- node->GetPolygon()->m_vertices[itr->m_verticesID[0]];
+				edgeLength = edgeDir.Length();
+				edgePos = node->GetPolygon()->m_vertices[itr->m_verticesID[0]]
+					+ (edgeDir.NormVector() * (edgeLength / 2));
+				m_edgesPath.push_back(edgePos);
+			}
+		}
 		node = node->GetParent();
 	}
 	node = node;
@@ -153,75 +167,37 @@ void Pathfinder::DrawDebug() {
 		polygon = m_navmesh.GetPolygon(i);
 		gfxDevice.SetPenColor(0.0f, 0.0f, 1.0f, 0.1f);
 		MOAIDraw::DrawPolygonFilled(polygon->m_vertices);
-		gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 0.7f);
+		gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 0.4f);
 		MOAIDraw::DrawPolygon(polygon->m_vertices);
 	}
 
-	gfxDevice.SetPenColor(0.0f, 1.0f, 0.0f, 1.f);
+	gfxDevice.SetPenColor(0.0f, 1.0f, 0.0f, 0.4f);
 	MOAIDraw::DrawEllipseFill(m_StartPosition.mX, m_StartPosition.mY, 5, 5, 32);
-	gfxDevice.SetPenColor(1.0f, 0.0f, 1.0f, 1.f);
+	gfxDevice.SetPenColor(1.0f, 0.0f, 1.0f, 0.4f);
 	MOAIDraw::DrawEllipseFill(m_EndPosition.mX, m_EndPosition.mY, 5, 5, 32);
 
-	//drawPath
+	//draw Polyogons path
 	for (std::vector<PathNode *>::iterator pathItr = m_finalPath.begin();
 	pathItr != m_finalPath.end(); ++pathItr) {
 		gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 0.5f);
 		MOAIDraw::DrawPolygonFilled((*pathItr)->GetPolygon()->m_vertices);
 	}
 
+	//draw Edges path
+	std::vector<USVec2D>::iterator edgeItr = m_edgesPath.begin();
+	uint16_t edgeIt = 0;
+	while (edgeIt < m_edgesPath.size() - 1) {
+		gfxDevice.SetPenColor(1.0f, 0.0f, 0.0f, 0.4f);
+		MOAIDraw::DrawLine(m_edgesPath.at(edgeIt), m_edgesPath.at(edgeIt++));
+	}
+
 	//startNode
-	gfxDevice.SetPenColor(0.0f, 1.0f, 0.0f, .5f);
+	gfxDevice.SetPenColor(0.0f, 1.0f, 0.0f, 0.5f);
 	MOAIDraw::DrawPolygonFilled(m_startNode->GetPolygon()->m_vertices);
 
 	//endNode
 	gfxDevice.SetPenColor(1.0f, 0.0f, 1.0f, 0.5f);
 	MOAIDraw::DrawPolygonFilled(m_endNode->GetPolygon()->m_vertices);
-	/*uint16_t gridRows = m_grid.GetGridWidth(); //also cols -> squared
-	USRect r;
-	r.mXMin = 0.f;
-	r.mYMin = 0.f;
-	r.mXMax = static_cast<float>(cellSize * gridRows);
-	r.mYMax = static_cast<float>(cellSize * gridRows);
-
-	MOAIDraw::DrawGrid(r, gridRows, gridRows);
-	USRect fillCell;
-
-	gfxDevice.SetPenColor(1.0f, 1.0f, 1.0f, 1.0f);
-	for (uint16_t i = 0; i < m_finalPath.size(); ++i) {
-		fillCell.mXMin = static_cast<float>(m_finalPath.at(i)->GetPos().mX * cellSize);
-		fillCell.mYMin = static_cast<float>(m_finalPath.at(i)->GetPos().mY * cellSize);
-		fillCell.mXMax = static_cast<float>(m_finalPath.at(i)->GetPos().mX * cellSize + cellSize);
-		fillCell.mYMax = static_cast<float>(m_finalPath.at(i)->GetPos().mY * cellSize + cellSize);
-		MOAIDraw::DrawRectFill(fillCell);
-	}
-
-	for (uint16_t i = 0; i < gridRows; ++i) {
-		for (uint16_t j = 0; j < gridRows; ++j) {
-			if (m_grid.IsObstacle(i, j)) {
-				gfxDevice.SetPenColor(1.0f, 0.0f, 0.0f, 1.0f);
-				fillCell.mXMin = static_cast<float>(i * cellSize);
-				fillCell.mYMin = static_cast<float>(j * cellSize);
-				fillCell.mXMax = static_cast<float>(i * cellSize + cellSize);
-				fillCell.mYMax = static_cast<float>(j * cellSize + cellSize);
-				MOAIDraw::DrawRectFill(fillCell);
-			}
-		}
-	}
-	//startPos
-	fillCell.mXMin = static_cast<float>(m_StartPosition.mX * cellSize);
-	fillCell.mYMin = static_cast<float>(m_StartPosition.mY * cellSize);
-	fillCell.mXMax = static_cast<float>(m_StartPosition.mX * cellSize + cellSize);
-	fillCell.mYMax = static_cast<float>(m_StartPosition.mY * cellSize + cellSize);
-	gfxDevice.SetPenColor(0.0f, 1.0f, 0.0f, 1.0f);
-	MOAIDraw::DrawRectFill(fillCell);
-
-	//endPos
-	fillCell.mXMin = static_cast<float>(m_EndPosition.mX * cellSize);
-	fillCell.mYMin = static_cast<float>(m_EndPosition.mY * cellSize);
-	fillCell.mXMax = static_cast<float>(m_EndPosition.mX * cellSize + cellSize);
-	fillCell.mYMax = static_cast<float>(m_EndPosition.mY * cellSize + cellSize);
-	gfxDevice.SetPenColor(0.0f, 0.0f, 1.0f, 1.0f);
-	MOAIDraw::DrawRectFill(fillCell);*/
 }
 
 void Pathfinder::InitStartPosition(float x, float y) {

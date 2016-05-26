@@ -35,6 +35,8 @@ private:
 
 class Pathfinder: public virtual MOAIEntity2D {
 public:
+	static Pathfinder &Instance();
+
 	Pathfinder();
 	~Pathfinder();
 
@@ -66,6 +68,7 @@ private:
 	std::vector<PathNode *> m_openNodes;
 	std::vector<PathNode *> m_closedNodes;
 	std::vector<PathNode *> m_finalPath;
+	std::vector<USVec2D> m_edgesPath; //edges points to calc pathfollowing
 
 	// Lua configuration
 public:
